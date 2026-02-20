@@ -9,7 +9,7 @@ Optional: certifi (for useDefaultCAs). Falls back to system CA paths.
 
 import sys
 
-from helmfile2compose import ConvertResult
+from helmfile2compose import ConvertResult, Converter
 
 
 def _get_default_cas():
@@ -79,11 +79,12 @@ def _collect_source(source, ctx, bundle_name):  # pylint: disable=too-many-retur
     return None, None  # empty/unknown source type — skip silently
 
 
-class TrustManagerConverter:
+class TrustManagerConverter(Converter):
     """Convert trust-manager Bundle to synthetic ConfigMap."""
 
+    name = "trust-manager"
     kinds = ["Bundle"]
-    priority = 20  # after cert-manager (needs secrets), before keycloak (produces configmaps)
+    priority = 200  # after cert-manager (needs secrets), before keycloak (produces configmaps)
 
     def convert(self, _kind, manifests, ctx):
         """Process Bundle manifests into synthetic ConfigMaps."""
