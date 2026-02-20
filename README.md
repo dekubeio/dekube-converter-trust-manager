@@ -5,7 +5,7 @@
 ![heresy: 4/10](https://img.shields.io/badge/heresy-4%2F10-yellow)
 ![public domain](https://img.shields.io/badge/license-public%20domain-brightgreen)
 
-trust-manager Bundle CRD converter for [helmfile2compose](https://github.com/helmfile2compose/h2c-core).
+trust-manager Bundle CRD converter for [helmfile2compose](https://github.com/helmfile2compose/helmfile2compose).
 
 ## Handled kinds
 
