@@ -9,7 +9,7 @@ Optional: certifi (for useDefaultCAs). Falls back to system CA paths.
 
 import sys
 
-from h2c import ConvertResult, Converter
+from h2c import ConverterResult, Converter
 
 
 def _get_default_cas():
@@ -116,4 +116,4 @@ class TrustManagerConverter(Converter):
                 ctx.warnings.append(
                     f"Bundle '{name}': no sources resolved — skipped")
 
-        return ConvertResult()
+        return ConverterResult()
