@@ -9,7 +9,7 @@ Optional: certifi (for useDefaultCAs). Falls back to system CA paths.
 
 import sys
 
-from h2c import ConverterResult, Converter
+from h2c import ConverterResult, Converter  # pylint: disable=import-error  # h2c resolves at runtime
 
 
 def _get_default_cas():
@@ -79,7 +79,7 @@ def _collect_source(source, ctx, bundle_name):  # pylint: disable=too-many-retur
     return None, None  # empty/unknown source type — skip silently
 
 
-class TrustManagerConverter(Converter):
+class TrustManagerConverter(Converter):  # pylint: disable=too-few-public-methods  # contract: one class, one method
     """Convert trust-manager Bundle to synthetic ConfigMap."""
 
     name = "trust-manager"
