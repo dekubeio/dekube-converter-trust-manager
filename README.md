@@ -1,11 +1,11 @@
-# h2c-converter-trust-manager
+# dekube-converter-trust-manager
 
 ![vibe coded](https://img.shields.io/badge/vibe-coded-ff69b4)
 ![python 3](https://img.shields.io/badge/python-3-3776AB)
 ![heresy: 4/10](https://img.shields.io/badge/heresy-4%2F10-yellow)
 ![public domain](https://img.shields.io/badge/license-public%20domain-brightgreen)
 
-trust-manager Bundle CRD converter for [helmfile2compose](https://github.com/helmfile2compose/helmfile2compose).
+trust-manager Bundle CRD converter for [dekube](https://dekube.io).
 
 ## Handled kinds
 
@@ -29,7 +29,7 @@ The assembled bundle is injected into `ctx.configmaps` under the Bundle's name, 
 
 ## Depends on
 
-- **h2c-converter-cert-manager** -- needs its generated Secrets as input for Secret-type sources. When using h2c-manager, cert-manager is auto-resolved as a dependency.
+- **dekube-converter-cert-manager** -- needs its generated Secrets as input for Secret-type sources. When using dekube-manager, cert-manager is auto-resolved as a dependency.
 
 ## Dependencies
 
@@ -37,18 +37,18 @@ The assembled bundle is injected into `ctx.configmaps` under the Bundle's name, 
 
 ## Usage
 
-Via h2c-manager (recommended -- auto-resolves cert-manager dependency):
+Via dekube-manager (recommended -- auto-resolves cert-manager dependency):
 
 ```bash
-python3 h2c-manager.py trust-manager
+python3 dekube-manager.py trust-manager
 ```
 
 Manual (both extensions must be in the same directory — `--extensions-dir` scans `.py` files and one-level subdirectories):
 
 ```bash
 mkdir -p extensions
-cp h2c-converter-cert-manager/cert_manager.py extensions/
-cp h2c-converter-trust-manager/trust_manager.py extensions/
+cp dekube-converter-cert-manager/cert_manager.py extensions/
+cp dekube-converter-trust-manager/trust_manager.py extensions/
 
 python3 helmfile2compose.py \
   --extensions-dir ./extensions \
@@ -68,7 +68,7 @@ python3 helmfile2compose.py \
 
 Worst CC: `_collect_source` (12, C).
 
-The `E0401: Unable to import 'h2c'` is expected — extensions import from h2c-core at runtime, not at lint time.
+The `E0401: Unable to import 'dekube'` is expected — extensions import from dekube-engine at runtime, not at lint time.
 
 ## License
 

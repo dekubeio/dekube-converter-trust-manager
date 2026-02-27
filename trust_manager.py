@@ -9,7 +9,7 @@ Optional: certifi (for useDefaultCAs). Falls back to system CA paths.
 
 import sys
 
-from h2c import ConverterResult, Converter  # pylint: disable=import-error  # h2c resolves at runtime
+from dekube import ConverterResult, Converter  # pylint: disable=import-error  # h2c resolves at runtime
 
 
 def _get_default_cas():
