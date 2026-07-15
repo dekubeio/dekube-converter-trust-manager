@@ -89,14 +89,14 @@ class TrustManagerConverter(Converter):  # pylint: disable=too-few-public-method
     def convert(self, _kind, manifests, ctx):
         """Process Bundle manifests into synthetic ConfigMaps."""
         for m in manifests:
-            name = m.get("metadata", {}).get("name", "?")
-            spec = m.get("spec", {})
-            target_key = (spec.get("target", {})
-                          .get("configMap", {})
+            name = (m.get("metadata") or {}).get("name", "?")
+            spec = m.get("spec") or {}
+            target_key = (((spec.get("target") or {})
+                           .get("configMap") or {})
                           .get("key", "ca-certificates.crt"))
 
             pem_parts = []
-            for source in spec.get("sources", []):
+            for source in (spec.get("sources") or []):
                 pem, warning = self._collect_source(source, ctx, name)
                 if pem:
                     pem_parts.append(pem)
