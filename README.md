@@ -13,7 +13,7 @@ trust-manager Bundle CRD converter for [dekube](https://dekube.io).
 
 ## What it does
 
-Replaces trust-manager's Bundle reconciliation with local assembly at conversion time. Collects PEM certificates from multiple sources and concatenates them into a single trust bundle ConfigMap.
+Replaces trust-manager's Bundle reconciliation with local assembly at conversion time. Collects PEM certificates from multiple sources and concatenates them into a single trust bundle, written to a ConfigMap, a Secret, or both — whichever `spec.target` fields the Bundle sets.
 
 Supported Bundle sources:
 - **Secret** -- reads a key from a K8s Secret in `ctx.secrets` (supports both `stringData` and base64-encoded `data`)
@@ -21,7 +21,7 @@ Supported Bundle sources:
 - **Inline PEM** -- uses the literal PEM string from `spec.sources[].inLine`
 - **System default CAs** -- when `useDefaultCAs: true`, reads system CA certificates (tries `certifi` first, then falls back to common system paths: `/etc/ssl/cert.pem`, `/etc/ssl/certs/ca-certificates.crt`, `/etc/ssl/certs/ca-bundle.crt`)
 
-The assembled bundle is injected into `ctx.configmaps` under the Bundle's name, with the key specified by `spec.target.configMap.key` (defaults to `ca-certificates.crt`). Workloads that mount this ConfigMap pick it up through the existing volume-mount machinery.
+The assembled bundle is injected into `ctx.configmaps` and/or `ctx.secrets` under the Bundle's name, depending on which of `spec.target.configMap` / `spec.target.secret` are set — each with its own `key` (defaults to `ca-certificates.crt`). Workloads that mount the resulting ConfigMap/Secret pick it up through the existing volume-mount machinery. A Bundle with neither target set is skipped with a warning.
 
 ## Priority
 
