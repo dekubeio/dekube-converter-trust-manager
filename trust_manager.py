@@ -11,6 +11,11 @@ import sys
 
 from dekube import ConverterResult, Converter  # pylint: disable=import-error  # h2c resolves at runtime
 
+# Bundle.spec.target.secret has the same shape as target.configMap — a TargetTemplate
+# with a "key" field (cert-manager/trust-manager pkg/apis/trust/v1alpha1: BundleTarget{
+# ConfigMap *TargetTemplate, Secret *TargetTemplate}, TargetTemplate{Key string}).
+_DEFAULT_TARGET_KEY = "ca-certificates.crt"
+
 
 class TrustManagerConverter(Converter):  # pylint: disable=too-few-public-methods  # contract: one class, one method
     """Convert trust-manager Bundle to synthetic ConfigMap."""
@@ -87,33 +92,56 @@ class TrustManagerConverter(Converter):  # pylint: disable=too-few-public-method
         return None, None  # empty/unknown source type — skip silently
 
     def convert(self, _kind, manifests, ctx):
-        """Process Bundle manifests into synthetic ConfigMaps."""
+        """Process Bundle manifests into synthetic ConfigMaps/Secrets."""
         for m in manifests:
             name = (m.get("metadata") or {}).get("name", "?")
             spec = m.get("spec") or {}
-            target_key = (((spec.get("target") or {})
-                           .get("configMap") or {})
-                          .get("key", "ca-certificates.crt"))
+            target = spec.get("target") or {}
+            cm_target = target.get("configMap") or {}
+            secret_target = target.get("secret") or {}
 
             pem_parts = []
             for source in (spec.get("sources") or []):
+                if not source:  # null list item (Helm conditional inside sources)
+                    continue
                 pem, warning = self._collect_source(source, ctx, name)
                 if pem:
                     pem_parts.append(pem)
                 if warning:
                     ctx.warnings.append(warning)
 
-            if pem_parts:
-                bundle = "\n".join(p.rstrip("\n") for p in pem_parts) + "\n"
-                # Inject as K8s ConfigMap format
-                ctx.configmaps[name] = {
-                    "metadata": {"name": name},
-                    "data": {target_key: bundle},
-                }
-                print(f"  trust-manager: generated bundle '{name}' "
-                      f"({len(pem_parts)} source(s))", file=sys.stderr)
-            else:
+            if not pem_parts:
                 ctx.warnings.append(
                     f"Bundle '{name}': no sources resolved — skipped")
+                continue
+
+            bundle = "\n".join(p.rstrip("\n") for p in pem_parts) + "\n"
+            written = []
+
+            if cm_target:
+                cm_key = cm_target.get("key", _DEFAULT_TARGET_KEY)
+                ctx.configmaps[name] = {
+                    "metadata": {"name": name},
+                    "data": {cm_key: bundle},
+                }
+                written.append(f"ConfigMap '{name}'")
+
+            if secret_target:
+                sec_key = secret_target.get("key", _DEFAULT_TARGET_KEY)
+                # stringData (plain), not data — avoids double base64-encoding, see
+                # write_secret_files()/the synthetic-secret convention used elsewhere.
+                ctx.secrets[name] = {
+                    "metadata": {"name": name},
+                    "stringData": {sec_key: bundle},
+                }
+                written.append(f"Secret '{name}'")
+
+            if not written:
+                ctx.warnings.append(
+                    f"Bundle '{name}': no target.configMap or target.secret — skipped")
+                continue
+
+            print(f"  trust-manager: generated bundle '{name}' -> {', '.join(written)} "
+                  f"({len(pem_parts)} source(s))", file=sys.stderr)
 
         return ConverterResult()
