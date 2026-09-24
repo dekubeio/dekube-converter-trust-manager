@@ -57,16 +57,16 @@ python3 helmfile2compose.py \
 
 ## Code quality
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-09-24*
 
 | Metric | Value |
 |--------|-------|
-| Pylint | 10.00/10 |
+| Pylint | 9.89/10 |
 | Pyflakes | clean |
-| Radon MI | 64.45 (A) |
-| Radon avg CC | 7.8 (B) |
+| Radon MI | 57.72 (A) |
+| Radon avg CC | 12.3 (C) |
 
-Worst CC: `_collect_source` (12, C).
+Worst CC: `convert` (17, C), `_collect_source` (15, C). No function rated D or worse.
 
 The `E0401: Unable to import 'dekube'` is expected — extensions import from dekube-engine at runtime, not at lint time.
 
